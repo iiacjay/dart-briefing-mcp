@@ -41,6 +41,14 @@ def _date_range(days: int) -> tuple[str, str]:
 async def _resolve_corp(company: str) -> dict | str:
     """Return corp dict on unique match, or error string."""
     await cc.ensure_loaded()
+    company = company.strip()
+
+    # 8자리 숫자 → corp_code 직접 조회
+    if company.isdigit() and len(company) == 8:
+        hit = cc.get_by_corp_code(company)
+        if hit:
+            return hit
+
     hits = cc.search(company)
     if not hits:
         return f"'{company}'에 해당하는 기업을 찾을 수 없습니다."
