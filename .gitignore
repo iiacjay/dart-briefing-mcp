@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+corp_code_cache.xml
+*.log
