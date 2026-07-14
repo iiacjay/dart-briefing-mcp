@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from datetime import date, timedelta
 
 from fastmcp import FastMCP
+from fastmcp.tools.tool import ToolAnnotations
 
 import corp_code as cc
 import dart_client as dc
@@ -13,6 +14,13 @@ from classifier import classify_disclosures
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
+
+_READ_ONLY = ToolAnnotations(
+    readOnlyHint=True,
+    destructiveHint=False,
+    idempotentHint=True,
+    openWorldHint=True,
+)
 
 
 @asynccontextmanager
@@ -64,9 +72,10 @@ async def _resolve_corp(company: str) -> dict | str:
 
 @mcp.tool(
     description=(
-        "기업명(일부) 또는 종목코드 6자리로 DART 기업 고유번호를 조회합니다. "
+        "[공시 브리핑] 기업명(일부) 또는 종목코드 6자리로 DART 기업 고유번호를 조회합니다. "
         "동명 다수일 때 후보 목록을 반환하므로 에이전트가 재질문할 수 있습니다."
-    )
+    ),
+    annotations=_READ_ONLY,
 )
 async def search_company(query: str) -> dict:
     """기업명 또는 종목코드로 DART 등록 기업을 검색합니다."""
@@ -95,12 +104,13 @@ async def search_company(query: str) -> dict:
 
 @mcp.tool(
     description=(
-        "기업의 최근 DART 공시 목록을 조회합니다. "
+        "[공시 브리핑] 기업의 최근 DART 공시 목록을 조회합니다. "
         "company 파라미터에는 기업명(예: '삼성전자') 또는 종목코드 6자리(예: '005930')를 입력하세요. "
         "corp_code(8자리 숫자)도 허용됩니다. "
         "disclosure_type: '정기공시' | '주요사항보고' | '발행공시' | '지분공시' | '전체'. "
         "각 공시에 DART 원문 링크(viewer_url)가 포함됩니다."
-    )
+    ),
+    annotations=_READ_ONLY,
 )
 async def get_recent_disclosures(
     company: str,
@@ -139,11 +149,12 @@ async def get_recent_disclosures(
 
 @mcp.tool(
     description=(
-        "주가 민감 주요 공시(유상증자·수주·자사주·최대주주변경 등)를 카테고리별로 분류해 반환합니다. "
+        "[공시 브리핑] 주가 민감 주요 공시(유상증자·수주·자사주·최대주주변경 등)를 카테고리별로 분류해 반환합니다. "
         "company 파라미터에는 기업명(예: '삼성전자') 또는 종목코드 6자리(예: '005930')를 입력하세요. "
         "corp_code(8자리 숫자)도 허용됩니다. "
         "에이전트가 '이번 달 자본조달 2건, 수주 1건' 식 브리핑을 만들기 좋습니다."
-    )
+    ),
+    annotations=_READ_ONLY,
 )
 async def get_major_events(company: str, days: int = 30) -> dict:
     """주가 민감 주요 공시를 분류해 반환합니다."""
@@ -176,10 +187,11 @@ async def get_major_events(company: str, days: int = 30) -> dict:
 
 @mcp.tool(
     description=(
-        "기업 개황(대표자, 업종, 설립일, 상장시장, 홈페이지)을 반환합니다. "
+        "[공시 브리핑] 기업 개황(대표자, 업종, 설립일, 상장시장, 홈페이지)을 반환합니다. "
         "company 파라미터에는 기업명(예: '삼성전자') 또는 종목코드 6자리(예: '005930')를 입력하세요. "
         "corp_code(8자리 숫자)도 허용됩니다."
-    )
+    ),
+    annotations=_READ_ONLY,
 )
 async def get_company_profile(company: str) -> dict:
     """기업 기본 정보를 반환합니다."""
